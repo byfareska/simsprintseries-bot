@@ -45,7 +45,7 @@ final class GiveRolesLoop
         $this->discord = $discord;
         $this->em = $em;
         $this->associatedNameRepository = $associatedNameRepository;
-        $this->results = $this->practice->getByActiveEvent($instance);
+        $this->results = $this->practice->getByActiveEvent($instance) ?: [];
         $this->channel = $this->discord->getChannel($instance->getAlertChannelId());
         $this->role = $this->channel->guild->roles->get("id", $instance->getDiscordGroupId());
         $this->permissions = $permissions;
