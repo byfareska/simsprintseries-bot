@@ -36,7 +36,6 @@ final class AutoReact extends AbstractPlugin
                 $this->addCommand($message);
 
             foreach ($this->autoReactList as $autoReact) {
-                var_dump(strtolower($message->content), $autoReact->getMessage(), str_contains(strtolower($message->content), $autoReact->getMessage()));
                 if (str_contains(strtolower($message->content), $autoReact->getMessage()))
                     $message->react($autoReact->getReact());
             }
@@ -74,7 +73,7 @@ final class AutoReact extends AbstractPlugin
 
         $ar = new AutoReactEntity();
         $ar->setMessage(strtolower($this->matcher->getMessageMatches()[1]));
-        $ar->setReact(trim($this->matcher->getMessageMatches()[2]));
+        $ar->setReact(str_replace([">", "<"], ["",""], trim($this->matcher->getMessageMatches()[2])));
         $this->em->persist($ar);
         $this->em->flush();
         $this->fetchAutoReactList();
