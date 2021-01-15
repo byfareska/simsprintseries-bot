@@ -102,7 +102,7 @@ final class HumanDateInterval
             return "pojutrze";
 
         if ($this->getDiffByDateWithoutTime()->d <= 7)
-            return self::translateDayName((int)$this->now->format("w"));
+            return self::translateDayName((int)$this->date->format("w"));
 
         return null;
     }
