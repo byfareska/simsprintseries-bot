@@ -4,6 +4,7 @@ namespace App\Discord\Plugin\UpcomingEvents;
 
 use App\Discord\Plugin\AbstractPlugin;
 use App\Helper\ArrayHelper;
+use App\Util\EventUrlGenerator;
 use App\Util\HumanDateInterval;
 use DateInterval;
 use DateTime;
@@ -18,11 +19,13 @@ final class UpcomingEvents extends AbstractPlugin
 {
     private CacheInterface $cache;
     private HttpClientInterface $httpClient;
+    private EventUrlGenerator $eventUrlGenerator;
 
-    public function __construct(CacheInterface $cache, HttpClientInterface $httpClient)
+    public function __construct(CacheInterface $cache, HttpClientInterface $httpClient, EventUrlGenerator $eventUrlGenerator)
     {
         $this->cache = $cache;
         $this->httpClient = $httpClient;
+        $this->eventUrlGenerator = $eventUrlGenerator;
     }
 
     protected function bind(): void
@@ -40,9 +43,15 @@ final class UpcomingEvents extends AbstractPlugin
         foreach ($events as $event) {
             $field = new Field($this->discord);
             $field->name = $event->relatedleague->name;
-            $relative = new HumanDateInterval($event->starts);
-            $monthName = HumanDateInterval::translateMonthName((int)$event->starts->format("n"));
-            $field->value = "**[{$event->name}](https://simss.pl/seria/formula1-ps4-zima-2020)** za **{$relative}** - {$event->starts->format("d")} {$monthName} {$event->starts->format("Y")}";
+            $field->value = sprintf(
+                "**[%s](%s)** za **%s** - %s %s %s",
+                $event->name,
+                $this->eventUrlGenerator->getUrl($event),
+                new HumanDateInterval($event->starts),
+                $event->starts->format("d"),
+                HumanDateInterval::translateMonthName((int)$event->starts->format("n")),
+                $event->starts->format("Y")
+            );
             $fields[] = $field;
         }
 
