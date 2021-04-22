@@ -36,7 +36,10 @@ services:
       - "@service_container"
   Discord\Discord:
     arguments:
-      - token: '%env(resolve:DISCORD_TOKEN)%'
+      -
+        token: '%env(resolve:DISCORD_TOKEN)%'
+        loadAllMembers: true
+        intents: 32767
   App\Command\AppCommand:
     arguments:
       $plugins: !tagged app.plugin

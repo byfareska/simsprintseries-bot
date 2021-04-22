@@ -6,6 +6,7 @@ use App\Discord\Plugin\AbstractPlugin;
 use App\Entity\AutoResponder as AutoResponderEntity;
 use App\Repository\AutoResponderRepository;
 use Discord\Parts\Channel\Message;
+use Discord\WebSockets\Event;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -24,7 +25,7 @@ final class AutoResponder extends AbstractPlugin
 
     protected function bind(): void
     {
-        $this->discord->on("message", fn(Message $message) => $this->messageHandler($message));
+        $this->discord->on(Event::MESSAGE_CREATE, fn(Message $message) => $this->messageHandler($message));
         $this->discord->getLoop()->addPeriodicTimer(60 * 60, fn() => $this->fetchAutoResponderList());
     }
 

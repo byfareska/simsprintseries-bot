@@ -22,36 +22,42 @@ final class AppCommand extends Command
     private ?OutputInterface $output = null;
     private PermissionsChecker $permissionsChecker;
 
-    public function __construct(string $name = null, Discord $discord, iterable $plugins = [], PermissionsChecker $permissionsChecker)
+    public function __construct(
+        string $name = null,
+        iterable $plugins = [],
+        PermissionsChecker $permissionsChecker,
+        Discord $discord
+    )
     {
-        $this->plugins = $plugins;
         $this->discord = $discord;
+        $this->plugins = $plugins;
         $this->permissionsChecker = $permissionsChecker;
         parent::__construct($name);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->input = $input;
-        $this->output = $output;
+        try {
+            $this->input = $input;
+            $this->output = $output;
 
-        $this->discord->on('ready', function () use ($output) {
-            echo "Bot is ready! Logged in as {$this->discord->user->username}!", PHP_EOL;
-        });
+            $this->discord->on('ready', function () use ($output) {
+                $this->output->writeln("Bot is ready! Logged in as {$this->discord->user->username}!");
+                $this->initPlugins();
+            });
 
-        $this->initPlugins();
-        $this->discord->run();
+            $this->discord->run();
+        } catch (Throwable $e) {
+            dump($e);
+        }
         return self::SUCCESS;
     }
 
     protected function initPlugins(): void
     {
         foreach ($this->plugins as $plugin) {
-            try {
-                $plugin->init($this->discord, $this->input, $this->output, $this->permissionsChecker);
-            } catch (Throwable $e) {
-                echo "{$e->getMessage()}\n";
-            }
+            $plugin->init($this->discord, $this->input, $this->output, $this->permissionsChecker);
+            $this->output->writeln("Loaded plugin " . get_class($plugin));
         }
     }
 }
