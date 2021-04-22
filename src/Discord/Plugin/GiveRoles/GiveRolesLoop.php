@@ -47,7 +47,9 @@ final class GiveRolesLoop
         $this->associatedNameRepository = $associatedNameRepository;
         $this->results = $this->practice->getByActiveEvent($instance) ?: [];
         $this->channel = $this->discord->getChannel($instance->getAlertChannelId());
-        $this->role = $this->channel->guild->roles->get("id", $instance->getDiscordGroupId());
+        $this->channel->guild->roles->fetch($instance->getDiscordGroupId())->then(function (Role $role){
+            $this->role = $role;
+        });
         $this->permissions = $permissions;
         $this->gaveRankTo = $gaveRankRepository->findByInstance($this->instance);
         $this->iterateResults();
